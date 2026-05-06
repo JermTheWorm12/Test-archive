@@ -848,10 +848,13 @@ def handle_command(state, command_text):
             "new\n"
             "quit"
         )
-        return
-
-    state["message"] = "Unknown command. Type help for commands."
-
+        if lowered == "debug save":
+    if os.path.exists(SAVE_FILE):
+        with open(SAVE_FILE, "r", encoding="utf-8") as file:
+            state["message"] = file.read()
+    else:
+        state["message"] = "No save file found."
+    return
 
 @app.route("/")
 def index():
