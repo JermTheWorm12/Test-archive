@@ -849,12 +849,12 @@ def handle_command(state, command_text):
             "quit"
         )
         if lowered == "debug save":
-    if os.path.exists(SAVE_FILE):
-        with open(SAVE_FILE, "r", encoding="utf-8") as file:
-            state["message"] = file.read()
-    else:
-        state["message"] = "No save file found."
-    return
+        if os.path.exists(SAVE_FILE):
+            with open(SAVE_FILE, "r", encoding="utf-8") as file:
+                state["message"] = file.read()
+        else:
+            state["message"] = "No save file found."
+        return
 
 @app.route("/")
 def index():
