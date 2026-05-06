@@ -752,8 +752,6 @@ def handle_safe_code(state, code_attempt):
     else:
         state["message"] = "Wrong code."
 
-
-def handle_command(state, command_text):
 def handle_command(state, command_text):
     command = normalize_spaces(command_text)
     lowered = command.lower()
