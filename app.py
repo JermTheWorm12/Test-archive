@@ -585,19 +585,33 @@ def build_display_text(state):
     return "\n".join(lines)
 
 
-def handle_go(state, target):
+def handle_go(state, target, override=False):
     exits = ROOM_EXITS[state["current_room"]]
+
     destination = find_case_insensitive_match(target, exits)
 
     if destination:
         state["current_room"] = destination
+        state["message"] = f"You move to the {destination}."
+        return
 
-        if destination == "Backyard":
-            state["message"] = "You move to the backyard patio."
+    if override:
+
+        all_rooms = set()
+        for room_list in ROOM_EXITS.values():
+            all_rooms.update(room_list)
+        all_rooms.update(ROOM_EXITS.keys())
+
+        destination = find_case_insensitive_match(target, list(all_rooms))
+
+        if destination:
+            state["current_room"] = destination
+            state["message"] = f"[OVERRIDE] You force your way into the {destination}."
         else:
-            state["message"] = f"You move to the {destination}."
-    else:
-        state["message"] = "You can't go there."
+            state["message"] = "Override failed: unknown destination."
+        return
+
+    state["message"] = "You can't go there."
 
 def handle_search(state, target):
     current_room = state["current_room"]
@@ -740,6 +754,7 @@ def handle_safe_code(state, code_attempt):
 
 
 def handle_command(state, command_text):
+def handle_command(state, command_text):
     command = normalize_spaces(command_text)
     lowered = command.lower()
 
@@ -747,12 +762,18 @@ def handle_command(state, command_text):
         state["message"] = "Type a command."
         return
 
+    override = False
+    if lowered.startswith("override "):
+        override = True
+        command = normalize_spaces(command[9:])
+        lowered = command.lower()
+
     if lowered.startswith("go to "):
-        handle_go(state, command[6:])
+        handle_go(state, command[6:], override=override)
         return
 
     if lowered.startswith("go "):
-        handle_go(state, command[3:])
+        handle_go(state, command[3:], override=override)
         return
 
     if lowered.startswith("search "):
